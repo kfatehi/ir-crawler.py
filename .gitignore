@@ -1,0 +1,4 @@
+*.pyc
+*.shelve
+/crawler4py
+current.txt
