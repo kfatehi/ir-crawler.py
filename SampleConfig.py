@@ -34,13 +34,19 @@ class SampleConfig(Config):
     def ValidUrl(self, url):
         '''Function to determine if the url is a valid url that should be fetched or not.'''
         parsed = urlparse(url)
+        valid = False
         try:
-            return ".ics.uci.edu" in parsed.hostname \
+            valid =  ".ics.uci.edu" in parsed.hostname \
                 and not re.match(".*\.(css|js|bmp|gif|jpe?g|ico" + "|png|tiff?|mid|mp2|mp3|mp4"\
 			    + "|wav|avi|mov|mpeg|ram|m4v|mkv|ogg|ogv|pdf" \
 			    + "|ps|eps|tex|ppt|pptx|doc|docx|xls|xlsx|names|data|dat|exe|bz2|tar|msi|bin|7z|psd|dmg|iso|epub|dll|cnf|tgz|sha1" \
 			    + "|thmx|mso|arff|rtf|jar|csv"\
-			    + "|rm|smil|wmv|swf|wma|zip|rar|gz)$", parsed.path)
-
+			    + "|rm|smil|wmv|swf|wma|zip|rar|gz)$", parsed.path.lower())
         except TypeError:
             print ("TypeError for ", parsed)
+
+        if len(parsed.query) > 0:
+            valid = False
+            print(time.ctime()+" "+"Rejected QueryString URL: "+url)
+
+        return valid
