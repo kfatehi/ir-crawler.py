@@ -18,12 +18,17 @@ class CrawlerConfig(Config):
         self.PolitenessDelay = 600
         self.MaxQueueSize = 100
         self.urlValidator = UrlValidator()
+        self.dbConf = open('db.conf').read()
+        self.connectDatabase()
+
+    def connectDatabase(self):
         try:
-            self.conn = psycopg2.connect(open('db.conf').read())
+            self.conn = psycopg2.connect(self.dbConf)
             print "Connected to database..."
         except Exception:
             traceback.print_exc()
             print "Could not connect to database, exiting."
+            print "Please close manually if it doesn't exit..."
             sys.exit(1)
 
     def GetSeeds(self):
@@ -46,6 +51,9 @@ class CrawlerConfig(Config):
         except psycopg2.IntegrityError:
             print "Already saved "+url
             self.conn.rollback()
+        except psycopg2.InterfaceError:
+            print "connection reset"
+            self.connectDatabase()
         except Exception:
             traceback.print_exc()
             print "Continuing despite error with saving URL: "+url

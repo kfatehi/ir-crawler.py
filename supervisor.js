@@ -1,10 +1,17 @@
 var spawn = require('child_process').spawn;
 
-function start() {
-  var proc = spawn('/usr/bin/python', ['Crawler.py'], {
+var proc = null;
+
+function startCrawler() {
+  proc = spawn('/usr/bin/python', ['Crawler.py'], {
     env: {
       PYTHONUNBUFFERED: "yes"
     }
+  })
+
+  proc.on('exit', function() {
+    console.log('proc exited');
+    proc = null;
   })
 
   proc.stderr.on('data', function(buffer) {
@@ -17,11 +24,31 @@ function start() {
     if (line.match(/Please close manually/)) {
       console.log('killing manually...');
       proc.kill("SIGKILL");
-      setTimeout(start, 2000);
     } else {
       console.log(line);
     }
   });
 }
 
-start();
+function watchFunc() {
+  if (proc) {
+    console.log('proc is running');
+  } else {
+    startCrawler();
+  }
+}
+
+// Checks if proc is running, otherwise starts it
+var watchInterval = setInterval(watchFunc, 2000);
+
+process.on('SIGINT', function() {
+  console.log('Supervisor received interrupt.');
+  if (proc) {
+    clearInterval(watchInterval);
+    proc.kill("SIGKILL");
+    console.log('Killed subprocess');
+  }
+  process.exit();
+})
+
+watchFunc()
