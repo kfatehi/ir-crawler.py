@@ -31,9 +31,7 @@ function startCrawler() {
 }
 
 function watchFunc() {
-  if (proc) {
-    console.log('proc is running');
-  } else {
+  if (proc == null) {
     startCrawler();
   }
 }
