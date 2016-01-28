@@ -1,4 +1,6 @@
 *.pyc
 *.shelve
 /crawler4py
+/psycopg2-2.6.1
 current.txt
+/db.conf

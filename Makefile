@@ -19,5 +19,24 @@ crawl-log:
 	make crawl > $(LOGDIR)/current.txt 2>&1 &
 	tail -f $(LOGDIR)/current.txt
 
+resume:
+	wait
+	PYTHONUNBUFFERED=yes /usr/bin/python Crawler.py >> $(LOGDIR)/current.txt 2>&1 &
+	tail -f $(LOGDIR)/current.txt
+
+resume-supervised:
+	node supervisor.js >> $(LOGDIR)/current.txt 2>&1
+
+start-supervised: cleandb
+	mkdir -p $(LOGDIR)/old
+	-mv $(LOGDIR)/current.txt $(LOGDIR)/old/$(LOGSTAMP).txt
+	cp js-logtail/* $(LOGDIR)
+	touch $(LOGDIR)/current.txt
+	chmod 755 $(LOGDIR)
+	chmod 755 $(LOGDIR)/*
+	wait
+	node supervisor.js > $(LOGDIR)/current.txt 2>&1 &
+	tail -f $(LOGDIR)/current.txt
+
 test-whitelist:
 	@cat /home/kfatehi/public_html/crawler_logs/old/all-rejects.txt | grep Reject | /usr/bin/python UrlValidator.py

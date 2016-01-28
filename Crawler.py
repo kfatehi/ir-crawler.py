@@ -1,5 +1,6 @@
 import sys
 sys.path.append("crawler4py")
+sys.path.append("psycopg2-2.6.1")
 from Crawler4py.Crawler import Crawler
 from Crawler4py.Config import Config
 from urlparse import urlparse, parse_qs
@@ -7,15 +8,23 @@ import re
 import time
 from UrlValidator import UrlValidator
 
+import psycopg2
+import traceback
+
 class CrawlerConfig(Config):
     def __init__(self):
         Config.__init__(self)
         self.UserAgentString = "UCI Inf141-CS121 crawler 63393716 32393047 22863530 82181685"
         self.PolitenessDelay = 600
         self.MaxQueueSize = 100
-        # lower number makes it exit faster after interrupt
-        self.OutBufferTimeOut = 10
         self.urlValidator = UrlValidator()
+        try:
+            self.conn = psycopg2.connect(open('db.conf').read())
+            print "Connected to database..."
+        except Exception:
+            traceback.print_exc()
+            print "Could not connect to database, exiting."
+            sys.exit(1)
 
     def GetSeeds(self):
         '''Returns the first set of urls to start crawling from'''
@@ -25,7 +34,21 @@ class CrawlerConfig(Config):
         '''Function to handle url data. Guaranteed to be Thread safe.
         parsedData = {"url" : "url", "text" : "text data from html", "html" : "raw html data"}
         Advisable to make this function light. Data can be massaged later. Storing data probably is more important'''
-        print(time.ctime()+" "+parsedData["url"])
+        try:
+            url = str(parsedData["url"])
+            text = str(parsedData["text"].encode('utf-8'))
+            cur = self.conn.cursor()
+            values = (url, text)
+            query = cur.mogrify("INSERT INTO PAGES (URL, TEXT) VALUES (%s, %s)", values)
+            cur.execute(query)
+            self.conn.commit()
+            print(time.ctime()+" Saved data: "+parsedData["url"])
+        except psycopg2.IntegrityError:
+            print "Already saved "+url
+            self.conn.rollback()
+        except Exception:
+            traceback.print_exc()
+            print "Continuing despite error with saving URL: "+url
 
     def ValidUrl(self, url):
         '''Function to determine if the url is a valid url that should be fetched or not.'''
