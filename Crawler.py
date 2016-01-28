@@ -5,6 +5,7 @@ from Crawler4py.Config import Config
 from urlparse import urlparse, parse_qs
 import re
 import time
+from UrlValidator import UrlValidator
 
 class CrawlerConfig(Config):
     def __init__(self):
@@ -12,6 +13,9 @@ class CrawlerConfig(Config):
         self.UserAgentString = "UCI Inf141-CS121 crawler 63393716 32393047 22863530 82181685"
         self.PolitenessDelay = 600
         self.MaxQueueSize = 100
+        # lower number makes it exit faster after interrupt
+        self.OutBufferTimeOut = 10
+        self.urlValidator = UrlValidator()
 
     def GetSeeds(self):
         '''Returns the first set of urls to start crawling from'''
@@ -25,23 +29,7 @@ class CrawlerConfig(Config):
 
     def ValidUrl(self, url):
         '''Function to determine if the url is a valid url that should be fetched or not.'''
-        parsed = urlparse(url)
-        valid = False
-        try:
-            valid =  ".ics.uci.edu" in parsed.hostname \
-                and not re.match(".*\.(css|js|bmp|gif|jpe?g|ico" + "|png|tiff?|mid|mp2|mp3|mp4"\
-			    + "|wav|avi|mov|mpeg|ram|m4v|mkv|ogg|ogv|pdf" \
-			    + "|ps|eps|tex|ppt|pptx|doc|docx|xls|xlsx|names|data|dat|exe|bz2|tar|msi|bin|7z|psd|dmg|iso|epub|dll|cnf|tgz|sha1" \
-			    + "|thmx|mso|arff|rtf|jar|csv"\
-			    + "|rm|smil|wmv|swf|wma|zip|rar|gz)$", parsed.path.lower())
-        except TypeError:
-            print ("TypeError for ", parsed)
-
-        if valid and len(parsed.query) > 0:
-            valid = False
-            print(time.ctime()+" "+"Rejected QueryString URL: "+url)
-
-        return valid
+        return self.urlValidator.allows(url)
 
 crawler = Crawler(CrawlerConfig())
 

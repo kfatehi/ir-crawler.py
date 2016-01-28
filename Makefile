@@ -18,3 +18,6 @@ crawl-log:
 	wait
 	make crawl > $(LOGDIR)/current.txt 2>&1 &
 	tail -f $(LOGDIR)/current.txt
+
+test-whitelist:
+	@cat /home/kfatehi/public_html/crawler_logs/old/all-rejects.txt | grep Reject | /usr/bin/python UrlValidator.py
