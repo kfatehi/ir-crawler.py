@@ -4,15 +4,14 @@ import re
 class UrlValidator():
     def allows(self, url):
         parsed = urlparse(url)
-        valid = False
         try:
-            valid = self.isICS(parsed.hostname) and not self.isBadType(parsed.path)
-            if valid and len(parsed.query) > 0:
-                if not self.isAllowedQuery(parsed.query):
-                    valid = False
+            if not self.isICS(parsed.hostname): return False
+            if self.isBadType(parsed.path): return False
+            if not self.isAllowedQuery(parsed.query): return False
+            return True
         except TypeError:
             print ("TypeError for ", parsed)
-        return valid
+            return False
 
     def allows_with_feedback(self, url):
         parsed = urlparse(url)

@@ -5,7 +5,7 @@ LOGSTAMP:=$(shell date +"%m-%d-%Y_%H-%M-%S")
 cleandb:
 	rm -f *.shelve
 
-crawl: cleandb
+crawl:
 	PYTHONUNBUFFERED=yes /usr/bin/python Crawler.py
 
 crawl-log: make-logfile
