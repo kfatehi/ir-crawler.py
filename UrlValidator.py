@@ -4,9 +4,11 @@ import re
 class UrlValidator():
     def allows(self, url):
         parsed = urlparse(url)
+        path = parsed.path.lower()
         try:
             if not self.isICS(parsed.hostname): return False
-            if self.isBadType(parsed.path): return False
+            if self.isBadPath(path): return False
+            if self.isBadType(path): return False
             if not self.isAllowedQuery(parsed.query): return False
             return True
         except TypeError:
@@ -16,16 +18,24 @@ class UrlValidator():
     def allows_with_feedback(self, url):
         parsed = urlparse(url)
         if not self.isICS(parsed.hostname):
-            print "Reject, not ICS"
+            print "Reject, not ICS"+url
+            return False
+        if self.isBadPath(parsed.path):
+            print "Reject, bad path"+url
             return False
         if self.isBadType(parsed.path):
-            print "Reject, bad type"
+            print "Reject, bad type"+url
             return False
         if not self.isAllowedQuery(parsed.query):
-            print "Reject, bad query string"
+            print "Reject, bad query string"+url
             return False
         print "Allow "+url
         return True
+
+    def isBadPath(self, path):
+        if re.match("#respond#respond#respond", path): return True
+        if "datasets/datasets/datasets" in path: return True
+        return False
 
     def isBadType(self, path):
         return re.match(".*\.(css|js|bmp|gif|jpe?g|ico|svg" \
@@ -34,7 +44,7 @@ class UrlValidator():
                 + "|ps|eps|tex|ppt|pptx|doc|docx|xls|xlsx|names|data|dat|exe|bz2|tar|msi|bin|7z|psd|dmg|iso|epub|dll|cnf|tgz|sha1" \
                 + "|thmx|mso|arff|rtf|jar|csv"\
                 + "|java|war|sh|cc|cpp|h|xml|rss|r"\
-                + "|rm|smil|wmv|swf|wma|zip|rar|gz)$", path.lower())
+                + "|rm|smil|wmv|swf|wma|zip|rar|gz)$", path)
 
     def isICS(self, hostname):
         return ".ics.uci.edu" in hostname
@@ -42,6 +52,7 @@ class UrlValidator():
     def isAllowedQuery(self, query):
         if query.strip() == 'rsd': return False
         qs = parse_qs(query)
+        if 'replytocom' in qs: return False
         if 'action' in qs:
             if qs['action'] == 'download': return False
             if qs['action'] == 'upload': return False
@@ -67,15 +78,8 @@ def test_logfile():
     import fileinput
     for line in fileinput.input():
         try:
-            url = line.split("URL: ")[1].strip()
-            parsed = urlparse(url)
-            if uv.isICS(parsed.hostname) and not uv.isBadType(parsed.path) and len(parsed.query) > 0:
-                if uv.isAllowedQuery(parsed.query):
-                    print "Allow: "+url
-                    pass
-                else:
-                    #print "Reject: "+url
-                    pass
+            url = line.split("Fetching ")[1].strip()
+            uv.allows_with_feedback(url)
         except IndexError:
             pass
 
@@ -84,11 +88,7 @@ def test_direct():
     import fileinput
     for url in fileinput.input():
         uv.allows_with_feedback(url)
-        if uv.allows(url):
-            print "allow"
-        else:
-            print "reject"
 
 if __name__ == "__main__":
-    #test_logfile();
-    test_direct();
+    test_logfile();
+    #test_direct();

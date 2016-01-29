@@ -34,4 +34,4 @@ make-logfile:
 	chmod 755 $(LOGDIR)/*
 
 test-whitelist:
-	@cat /home/kfatehi/public_html/crawler_logs/old/all-rejects.txt | grep Reject | /usr/bin/python UrlValidator.py
+	@tail -n2000 /home/kfatehi/public_html/crawler_logs/current.txt | /usr/bin/python UrlValidator.py
