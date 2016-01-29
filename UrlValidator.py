@@ -8,11 +8,25 @@ class UrlValidator():
         try:
             valid = self.isICS(parsed.hostname) and not self.isBadType(parsed.path)
             if valid and len(parsed.query) > 0:
-                self.isAllowedQuery(parsed.query)
-                valid = False
+                if not self.isAllowedQuery(parsed.query):
+                    valid = False
         except TypeError:
             print ("TypeError for ", parsed)
         return valid
+
+    def allows_with_feedback(self, url):
+        parsed = urlparse(url)
+        if not self.isICS(parsed.hostname):
+            print "Reject, not ICS"
+            return False
+        if self.isBadType(parsed.path):
+            print "Reject, bad type"
+            return False
+        if not self.isAllowedQuery(parsed.query):
+            print "Reject, bad query string"
+            return False
+        print "Allow "+url
+        return True
 
     def isBadType(self, path):
         return re.match(".*\.(css|js|bmp|gif|jpe?g|ico|svg" \
@@ -27,9 +41,11 @@ class UrlValidator():
         return ".ics.uci.edu" in hostname
 
     def isAllowedQuery(self, query):
-        if query == 'rsd': return False
+        if query.strip() == 'rsd': return False
         qs = parse_qs(query)
         if 'action' in qs:
+            if qs['action'] == 'download': return False
+            if qs['action'] == 'upload': return False
             if qs['action'][0] == 'download': return False
             if qs['action'][0] == 'upload': return False
         # we wont block the calendar outright, but:
@@ -45,8 +61,9 @@ class UrlValidator():
         if 'from' in qs and 'precision' in qs: return False
         return True
 
-# run it with `make test-whitelist`
-if __name__ == "__main__":
+# the rest is just for testing ...
+
+def test_logfile():
     uv = UrlValidator()
     import fileinput
     for line in fileinput.input():
@@ -62,3 +79,17 @@ if __name__ == "__main__":
                     pass
         except IndexError:
             pass
+
+def test_direct():
+    uv = UrlValidator()
+    import fileinput
+    for url in fileinput.input():
+        uv.allows_with_feedback(url)
+        if uv.allows(url):
+            print "allow"
+        else:
+            print "reject"
+
+if __name__ == "__main__":
+    #test_logfile();
+    test_direct();
