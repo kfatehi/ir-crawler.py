@@ -5,7 +5,6 @@ from Crawler4py.Crawler import Crawler
 from Crawler4py.Config import Config
 from urlparse import urlparse, parse_qs
 import re
-import time
 from UrlValidator import UrlValidator
 
 import psycopg2
@@ -47,16 +46,16 @@ class CrawlerConfig(Config):
             query = cur.mogrify("INSERT INTO PAGES (URL, TEXT) VALUES (%s, %s)", values)
             cur.execute(query)
             self.conn.commit()
-            print(time.ctime()+" Saved data: "+parsedData["url"])
+            print "Saved data: "+parsedData["url"]
         except psycopg2.IntegrityError:
             print "Already saved "+url
             self.conn.rollback()
         except psycopg2.InterfaceError:
-            print "connection reset"
+            print "Connection reset"
             self.connectDatabase()
         except Exception:
+            print "Error saving URL: "+url
             traceback.print_exc()
-            print "Continuing despite error with saving URL: "+url
 
     def ValidUrl(self, url):
         '''Function to determine if the url is a valid url that should be fetched or not.'''
