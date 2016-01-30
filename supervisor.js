@@ -2,30 +2,35 @@ var spawn = require('child_process').spawn;
 
 var proc = null;
 
+var print = function(line) {
+  if (line && line.length)
+    console.log(new Date().toLocaleTimeString()+" "+line);
+}
+
+var killCrawler = function() {
+  proc.kill("SIGKILL");
+  print("Sent SIGKILL to Crawler")
+}
+
 function startCrawler() {
-  proc = spawn('/usr/bin/python', ['Crawler.py'], {
-    env: {
-      PYTHONUNBUFFERED: "yes"
-    }
-  })
+  var opts = { env: { PYTHONUNBUFFERED: "yes" } };
+  proc = spawn('/usr/bin/python', ['Crawler.py'], opts)
 
   proc.on('exit', function() {
-    console.log('proc exited');
+    print('Crawler exited')
     proc = null;
   })
 
   proc.stderr.on('data', function(buffer) {
-    var line = buffer.toString().trim();
-    console.log(line);
+    print(buffer.toString().trim());
   })
 
   proc.stdout.on('data', function(buffer) {
     var line = buffer.toString().trim();
     if (line.match(/Please close manually/)) {
-      console.log('killing manually...');
-      proc.kill("SIGKILL");
+      killCrawler()
     } else {
-      console.log(line);
+      print(line);
     }
   });
 }
@@ -40,11 +45,10 @@ function watchFunc() {
 var watchInterval = setInterval(watchFunc, 2000);
 
 process.on('SIGINT', function() {
-  console.log('Supervisor received interrupt.');
+  print('Supervisor received interrupt.');
   if (proc) {
     clearInterval(watchInterval);
-    proc.kill("SIGKILL");
-    console.log('Killed subprocess');
+    killCrawler()
   }
   process.exit();
 })
