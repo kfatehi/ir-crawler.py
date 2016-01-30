@@ -10,6 +10,7 @@ class UrlValidator():
             if self.isBadPath(path): return False
             if self.isBadType(path): return False
             if not self.isAllowedQuery(parsed.query): return False
+            if not self.isAllowedFragment(parsed.fragment): return False
             return True
         except TypeError:
             print ("TypeError for ", parsed)
@@ -18,24 +19,30 @@ class UrlValidator():
     def allows_with_feedback(self, url):
         parsed = urlparse(url)
         if not self.isICS(parsed.hostname):
-            print "Reject, not ICS"+url
+            print "Reject, not ICS "+url
             return False
         if self.isBadPath(parsed.path):
-            print "Reject, bad path"+url
+            print "Reject, bad path "+url
             return False
         if self.isBadType(parsed.path):
-            print "Reject, bad type"+url
+            print "Reject, bad type "+url
             return False
         if not self.isAllowedQuery(parsed.query):
-            print "Reject, bad query string"+url
+            print "Reject, bad query string "+url
+            return False
+        if not self.isAllowedFragment(parsed.fragment):
+            print "Reject, bad fragment "+url
             return False
         print "Allow "+url
         return True
 
     def isBadPath(self, path):
-        if re.match("#respond#respond#respond", path): return True
         if "datasets/datasets/datasets" in path: return True
         return False
+
+    def isAllowedFragment(self, frag):
+        if re.match("respond", frag): return False
+        return True
 
     def isBadType(self, path):
         return re.match(".*\.(css|js|bmp|gif|jpe?g|ico|svg" \
@@ -90,5 +97,5 @@ def test_direct():
         uv.allows_with_feedback(url)
 
 if __name__ == "__main__":
-    test_logfile();
-    #test_direct();
+    #test_logfile();
+    test_direct();
