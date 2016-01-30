@@ -1,10 +1,14 @@
 var spawn = require('child_process').spawn;
+var logFile = '/home/kfatehi/public_html/crawler_logs/current.txt';
+var logger = require('./logger')(logFile);
 
 var proc = null;
 
+
 var print = function(line) {
-  if (line && line.length)
-    console.log(new Date().toLocaleTimeString()+" "+line);
+  if (line && line.length) {
+    logger.push(new Date().toLocaleTimeString()+" "+line);
+  }
 }
 
 var killCrawler = function() {
@@ -13,8 +17,7 @@ var killCrawler = function() {
 }
 
 function startCrawler() {
-  var opts = { env: { PYTHONUNBUFFERED: "yes" } };
-  proc = spawn('/usr/bin/python', ['Crawler.py'], opts)
+  proc = spawn('/usr/bin/python', ['Crawler.py'], { env: { PYTHONUNBUFFERED: "yes" } })
 
   proc.on('exit', function() {
     print('Crawler exited')
@@ -54,3 +57,5 @@ process.on('SIGINT', function() {
 })
 
 watchFunc()
+
+spawn('tail', ['-f', logFile], { stdio: 'inherit' });
