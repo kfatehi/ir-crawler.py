@@ -42,7 +42,7 @@ function watchFunc() {
 }
 
 // Checks if proc is running, otherwise starts it
-var watchInterval = setInterval(watchFunc, 2000);
+var watchInterval = setInterval(watchFunc, 25000);
 
 process.on('SIGINT', function() {
   print('Supervisor received interrupt.');
