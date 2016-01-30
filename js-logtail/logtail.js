@@ -111,19 +111,14 @@ function get_log() {
         },
         error: function (xhr, s, t) {
             loading = false;
+            /* 416: Requested range not satisfiable: log was truncated. */
+            /* 404: Retry soon, I guess */
 
-            if (xhr.status === 416 || xhr.status == 404) {
-                /* 416: Requested range not satisfiable: log was truncated. */
-                /* 404: Retry soon, I guess */
+            log_file_size = 0;
+            log_data = "";
+            show_log();
 
-                log_file_size = 0;
-                log_data = "";
-                show_log();
-
-                setTimeout(get_log, poll);
-            } else {
-                throw "Unknown AJAX Error (status " + xhr.status + ")";
-            }
+            setTimeout(get_log, poll);
         }
     });
 }
