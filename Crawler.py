@@ -10,6 +10,8 @@ from UrlValidator import UrlValidator
 import psycopg2
 import traceback
 
+import NetShelve
+
 class CrawlerConfig(Config):
     def __init__(self):
         Config.__init__(self)
@@ -19,6 +21,13 @@ class CrawlerConfig(Config):
         self.urlValidator = UrlValidator()
         self.dbConf = open('db.conf').read()
         self.connectDatabase()
+        print "Using Postgres shelve implementation..."
+        self.PersistenceObject = NetShelve.PgShelve(self.conn, "pgshelve", "main")
+
+    def rowExists(self, url):
+        cur = self.conn.cursor()
+        cur.execute("SELECT COUNT(*) FROM PAGES WHERE URL = %s", (url,))
+        return cur.fetchone()[0] == 1
 
     def connectDatabase(self):
         try:
@@ -39,16 +48,19 @@ class CrawlerConfig(Config):
         parsedData = {"url" : "url", "text" : "text data from html", "html" : "raw html data"}
         Advisable to make this function light. Data can be massaged later. Storing data probably is more important'''
         try:
+            self.conn.rollback()
             url = str(parsedData["url"])
-            text = str(parsedData["text"].encode('utf-8'))
-            cur = self.conn.cursor()
-            values = (url, text)
-            query = cur.mogrify("INSERT INTO PAGES (URL, TEXT) VALUES (%s, %s)", values)
-            cur.execute(query)
-            self.conn.commit()
-            print "Saved data: "+parsedData["url"]
+            if self.rowExists(url):
+                print "Already saved "+url
+            else:
+                text = str(parsedData["text"].encode('utf-8'))
+                cur = self.conn.cursor()
+                values = (url, text)
+                query = cur.mogrify("INSERT INTO PAGES (URL, TEXT) VALUES (%s, %s)", values)
+                cur.execute(query)
+                self.conn.commit()
+                print "Saved data: "+parsedData["url"]
         except psycopg2.IntegrityError:
-            print "Already saved "+url
             self.conn.rollback()
         except psycopg2.InterfaceError:
             print "Connection reset"
@@ -56,6 +68,11 @@ class CrawlerConfig(Config):
         except Exception:
             print "Error saving URL: "+url
             traceback.print_exc()
+            try:
+                self.conn.rollback()
+                print "Rolled back transaction"
+            except Exception:
+                print "Failed to rollback transaction"
 
     def ValidUrl(self, url):
         '''Function to determine if the url is a valid url that should be fetched or not.'''
