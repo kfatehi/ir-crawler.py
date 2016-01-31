@@ -19,25 +19,25 @@ class CrawlerConfig(Config):
         self.PolitenessDelay = 600
 
         #Timeout(Seconds) for trying to get the next url from the frontier. 
-        self.FrontierTimeOut = 120
+        self.FrontierTimeOut = 60
 
         #Timeout(Seconds) for trying to get a free worker thread, (worker is taking too long maybe?)
-        self.WorkerTimeOut = 120
+        self.WorkerTimeOut = 60
 
         #Timeout(Seconds) for getting data from the output queue
-        self.OutBufferTimeOut = 120
+        self.OutBufferTimeOut = 60
 
         self.MaxQueueSize = 100
 
         self.urlValidator = UrlValidator()
         self.dbConf = open('db.conf').read()
-        self.connectDatabase()
+        self.conn = self.connectDatabase()
         print "Using Postgres shelve implementation..."
-        self.PersistenceObject = NetShelve.PgShelve(self.conn)
+        self.PersistenceObject = NetShelve.PgShelve(self.connectDatabase())
 
     def connectDatabase(self):
         try:
-            self.conn = psycopg2.connect(self.dbConf)
+            return psycopg2.connect(self.dbConf)
             print "Connected to database..."
         except Exception:
             traceback.print_exc()
@@ -64,10 +64,11 @@ class CrawlerConfig(Config):
             self.conn.commit()
             print "Saved data: "+parsedData["url"]
         except psycopg2.IntegrityError:
+            traceback.print_exc()
             self.conn.rollback()
         except psycopg2.InterfaceError:
             print "Connection reset"
-            self.connectDatabase()
+            self.conn = self.connectDatabase()
         except Exception:
             print "Error saving URL: "+url
             traceback.print_exc()

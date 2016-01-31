@@ -24,19 +24,16 @@ class PgShelve(UserDict.DictMixin):
         cur.execute("SELECT COUNT(*) FROM PAGES WHERE URL = %s", (key,))
         return cur.fetchone()[0] == 1
 
-    def commit(self):
-        cur = self.conn.cursor()
-        for key in self.dict:
-            val = pickle.dumps(self.dict[key])
-            if self.keyExists(key, cur):
-                cur.execute("UPDATE PAGES SET STATE = %s WHERE URL = %s", (val, key,))
-            else:
-                cur.execute("INSERT INTO PAGES (URL, STATE) VALUES (%s, %s)", (key, val,))
-        cur.close()
-        self.conn.commit()
-
     def __setitem__(self, key, item):
         self.dict[key] = item
+        cur = self.conn.cursor()
+        val = pickle.dumps(self.dict[key])
+        if self.keyExists(key, cur):
+            cur.execute("UPDATE PAGES SET STATE = %s WHERE URL = %s", (val, key,))
+        else:
+            cur.execute("INSERT INTO PAGES (URL, STATE) VALUES (%s, %s)", (key, val,))
+        self.conn.commit()
+        cur.close()
 
     def __getitem__(self, key):
         return self.dict[key]
@@ -45,7 +42,7 @@ class PgShelve(UserDict.DictMixin):
         return self.dict.keys()
 
     def sync(self):
-        self.commit()
+        pass
 
 if __name__ == "__main__":
     import psycopg2
