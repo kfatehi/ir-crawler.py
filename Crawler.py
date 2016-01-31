@@ -27,7 +27,7 @@ class CrawlerConfig(Config):
         #Timeout(Seconds) for getting data from the output queue
         self.OutBufferTimeOut = 120
 
-        self.MaxQueueSize = 200
+        self.MaxQueueSize = 100
 
         self.urlValidator = UrlValidator()
         self.dbConf = open('db.conf').read()
@@ -53,6 +53,7 @@ class CrawlerConfig(Config):
         '''Function to handle url data. Guaranteed to be Thread safe.
         parsedData = {"url" : "url", "text" : "text data from html", "html" : "raw html data"}
         Advisable to make this function light. Data can be massaged later. Storing data probably is more important'''
+        cur = None
         try:
             self.conn.rollback()
             url = str(parsedData["url"])
@@ -75,6 +76,8 @@ class CrawlerConfig(Config):
                 print "Rolled back transaction"
             except Exception:
                 print "Failed to rollback transaction"
+        finally:
+            if cur != None: cur.close()
 
     def ValidUrl(self, url):
         '''Function to determine if the url is a valid url that should be fetched or not.'''

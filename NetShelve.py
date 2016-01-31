@@ -17,6 +17,7 @@ class PgShelve(UserDict.DictMixin):
         cur.execute("SELECT URL,STATE FROM PAGES")
         for row in cur.fetchall():
             dict[row[0]] = pickle.loads(str(row[1]))
+        cur.close()
         return dict
 
     def keyExists(self, key, cur):
@@ -31,6 +32,7 @@ class PgShelve(UserDict.DictMixin):
                 cur.execute("UPDATE PAGES SET STATE = %s WHERE URL = %s", (val, key,))
             else:
                 cur.execute("INSERT INTO PAGES (URL, STATE) VALUES (%s, %s)", (key, val,))
+        cur.close()
         self.conn.commit()
 
     def __setitem__(self, key, item):
