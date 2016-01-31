@@ -17,17 +17,23 @@ class CrawlerConfig(Config):
         Config.__init__(self)
         self.UserAgentString = "UCI Inf141-CS121 crawler 63393716 32393047 22863530 82181685"
         self.PolitenessDelay = 600
-        self.MaxQueueSize = 100
+
+        #Timeout(Seconds) for trying to get the next url from the frontier. 
+        self.FrontierTimeOut = 120
+
+        #Timeout(Seconds) for trying to get a free worker thread, (worker is taking too long maybe?)
+        self.WorkerTimeOut = 120
+
+        #Timeout(Seconds) for getting data from the output queue
+        self.OutBufferTimeOut = 120
+
+        self.MaxQueueSize = 200
+
         self.urlValidator = UrlValidator()
         self.dbConf = open('db.conf').read()
         self.connectDatabase()
         print "Using Postgres shelve implementation..."
-        self.PersistenceObject = NetShelve.PgShelve(self.conn, "pgshelve", "main")
-
-    def rowExists(self, url):
-        cur = self.conn.cursor()
-        cur.execute("SELECT COUNT(*) FROM PAGES WHERE URL = %s", (url,))
-        return cur.fetchone()[0] == 1
+        self.PersistenceObject = NetShelve.PgShelve(self.conn)
 
     def connectDatabase(self):
         try:
@@ -50,16 +56,12 @@ class CrawlerConfig(Config):
         try:
             self.conn.rollback()
             url = str(parsedData["url"])
-            if self.rowExists(url):
-                print "Already saved "+url
-            else:
-                text = str(parsedData["text"].encode('utf-8'))
-                cur = self.conn.cursor()
-                values = (url, text)
-                query = cur.mogrify("INSERT INTO PAGES (URL, TEXT) VALUES (%s, %s)", values)
-                cur.execute(query)
-                self.conn.commit()
-                print "Saved data: "+parsedData["url"]
+            text = str(parsedData["text"].encode('utf-8'))
+            cur = self.conn.cursor()
+            query = cur.mogrify("UPDATE PAGES SET TEXT = %s WHERE URL = %s", (text, url))
+            cur.execute(query)
+            self.conn.commit()
+            print "Saved data: "+parsedData["url"]
         except psycopg2.IntegrityError:
             self.conn.rollback()
         except psycopg2.InterfaceError:

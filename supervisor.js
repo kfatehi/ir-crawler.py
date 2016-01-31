@@ -30,7 +30,7 @@ function startCrawler() {
 
   proc.stdout.on('data', function(buffer) {
     var line = buffer.toString().trim();
-    if (line.match(/Please close manually/)) {
+    if (line.match(/Please close manually/) || line.match(/No value in Output buffer/)) {
       killCrawler()
     } else {
       print(line);

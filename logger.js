@@ -8,7 +8,7 @@ module.exports = function(filePath) {
     fs.writeSync(fd, "Truncated in order to avoid hitting disk space quota...\n")
   }
 
-  setInterval(truncate, 60000)
+  setInterval(truncate, 5 * 60 * 1000) // 5 mins
   truncate();
 
   return {
