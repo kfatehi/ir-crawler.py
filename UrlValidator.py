@@ -58,7 +58,7 @@ class UrlValidator():
         if query.strip() == 'rsd': return False
         qs = parse_qs(query)
         # Block all query string urls downstream of datasets
-        if "http://archive.ics.uci.edu/ml/datasets.html?" in url:
+        if "archive.ics.uci.edu/ml/datasets.html?" in url:
             return False
         if 'replytocom' in qs: return False
         if 'action' in qs:
