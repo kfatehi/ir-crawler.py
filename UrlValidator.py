@@ -2,39 +2,37 @@ from urlparse import urlparse, parse_qs
 import re
 
 class UrlValidator():
+    def __init__(self, verbose=False):
+        self.verbose = verbose
+
     def allows(self, url):
         parsed = urlparse(url)
         path = parsed.path.lower()
         try:
-            if not self.isICS(parsed.hostname): return False
-            if self.isBadPath(path): return False
-            if self.isBadType(path): return False
-            if not self.isAllowedQuery(parsed.query): return False
-            if not self.isAllowedFragment(parsed.fragment): return False
+            if not self.isICS(parsed.hostname):
+                self.feedback("Reject, not ICS "+url)
+                return False
+            if self.isBadPath(parsed.path):
+                self.feedback("Reject, bad path "+url)
+                return False
+            if self.isBadType(parsed.path):
+                self.feedback("Reject, bad type "+url)
+                return False
+            if not self.isAllowedQuery(url, parsed.query):
+                self.feedback("Reject, bad query string "+url)
+                return False
+            if not self.isAllowedFragment(parsed.fragment):
+                self.feedback("Reject, bad fragment "+url)
+                return False
+            self.feedback("Allow "+url)
             return True
         except TypeError:
             print ("TypeError for ", parsed)
             return False
 
-    def allows_with_feedback(self, url):
-        parsed = urlparse(url)
-        if not self.isICS(parsed.hostname):
-            print "Reject, not ICS "+url
-            return False
-        if self.isBadPath(parsed.path):
-            print "Reject, bad path "+url
-            return False
-        if self.isBadType(parsed.path):
-            print "Reject, bad type "+url
-            return False
-        if not self.isAllowedQuery(parsed.query):
-            print "Reject, bad query string "+url
-            return False
-        if not self.isAllowedFragment(parsed.fragment):
-            print "Reject, bad fragment "+url
-            return False
-        print "Allow "+url
-        return True
+    def feedback(self, string):
+        if self.verbose:
+            print string
 
     def isBadPath(self, path):
         if "datasets/datasets/datasets" in path: return True
@@ -56,9 +54,12 @@ class UrlValidator():
     def isICS(self, hostname):
         return ".ics.uci.edu" in hostname
 
-    def isAllowedQuery(self, query):
+    def isAllowedQuery(self, url, query):
         if query.strip() == 'rsd': return False
         qs = parse_qs(query)
+        # Block all query string urls downstream of datasets
+        if "http://archive.ics.uci.edu/ml/datasets.html?" in url:
+            return False
         if 'replytocom' in qs: return False
         if 'action' in qs:
             if qs['action'] == 'download': return False
@@ -81,20 +82,20 @@ class UrlValidator():
 # the rest is just for testing ...
 
 def test_logfile():
-    uv = UrlValidator()
+    uv = UrlValidator(verbose=True)
     import fileinput
     for line in fileinput.input():
         try:
             url = line.split("Fetching ")[1].strip()
-            uv.allows_with_feedback(url)
+            uv.allows(url)
         except IndexError:
             pass
 
 def test_direct():
-    uv = UrlValidator()
+    uv = UrlValidator(verbose=True)
     import fileinput
     for url in fileinput.input():
-        uv.allows_with_feedback(url)
+        uv.allows(url)
 
 if __name__ == "__main__":
     #test_logfile();
