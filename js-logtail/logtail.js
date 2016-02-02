@@ -10,7 +10,7 @@ var scrollelems = ["html", "body"];
 var url = window.logURL;
 var fix_rn = true;
 var load = 30 * 1024; /* 30KB */
-var poll = 1000; /* 1s */
+var poll = 2000; /* 1s */
 
 var kill = false;
 var loading = false;
