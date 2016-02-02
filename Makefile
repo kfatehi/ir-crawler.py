@@ -9,6 +9,7 @@ SRC= \
 		 src/db/*.java
 
 common-words: compile
+:qa
 	java -classpath $(CLASSPATH) -D$(JDBC) \
 		-Dpg_password=$(shell cat _private/prod_db_password.txt) \
 	 	ir.FindCommonWords
