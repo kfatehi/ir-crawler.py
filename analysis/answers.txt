@@ -1,0 +1,19 @@
+How much time did it take to crawl the entire domain?
+
+Approximately 2 days.
+
+How many unique pages did you find in the entire domain? (Uniqueness is established by the URL, not the page's content.)
+
+51509
+
+How many subdomains did you find?
+
+See subdomain.txt
+
+What is the longest page in terms of number of words? (Don't count HTML markup as words.)
+
+http://cybert.ics.uci.edu/static/sampledata/SubEncodeNonZero.fpkm
+
+What are the 500 most common words in this domain?
+
+See CommonWords.txt
