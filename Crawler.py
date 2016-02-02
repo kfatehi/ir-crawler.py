@@ -29,7 +29,7 @@ class CrawlerConfig(Config):
 
         self.MaxQueueSize = 100
 
-        self.urlValidator = UrlValidator()
+        self.urlValidator = UrlValidator(verbose=False)
         self.dbConf = open('db.conf').read()
         self.conn = self.connectDatabase()
         print "Using Postgres shelve implementation..."
