@@ -35,11 +35,13 @@ class UrlValidator():
             print string
 
     def isBadPath(self, path):
+        if "/pub/arch/adl/adl/" in path: return True
+        if "<a href=" in path: return True
         if "datasets/datasets/datasets" in path: return True
         return False
 
     def isAllowedFragment(self, frag):
-        if re.match("respond", frag): return False
+        if re.match(".*respond.*", frag): return False
         return True
 
     def isBadType(self, path):
@@ -59,6 +61,9 @@ class UrlValidator():
         qs = parse_qs(query)
         # Block all query string urls downstream of datasets
         if "archive.ics.uci.edu/ml/datasets.html?" in url:
+            return False
+        # Block this messed up wiki
+        if "ironwood.ics.uci.edu/lib/exe/indexer.php?" in url:
             return False
         if 'replytocom' in qs: return False
         if 'action' in qs:
