@@ -16,7 +16,12 @@ class PgShelve(UserDict.DictMixin):
         cur = self.conn.cursor()
         cur.execute("SELECT URL,STATE FROM PAGES")
         for row in cur.fetchall():
-            dict[row[0]] = pickle.loads(str(row[1]))
+            key = row[0]
+            try:
+                dict[key] = pickle.loads(str(row[1]))
+            except pickle.UnpicklingError:
+                # False as first value makes crawler add it to frontier
+                dict[key] = (False, 0)
         cur.close()
         return dict
 
