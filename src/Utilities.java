@@ -94,7 +94,7 @@ public class Utilities {
 	 * 
 	 * @param frequencies A list of frequencies.
 	 */
-	public static void printFrequencies(List<Frequency> frequencies) {
+	public static void printFrequencies(List<Frequency> frequencies, String format) {
 		String type = "item";
 		boolean twoGram = true;
 		int total = 0;
@@ -126,7 +126,7 @@ public class Utilities {
 
 		for (Frequency freq : frequencies) {
 			// Print the frequencies in a tabular format
-			System.out.printf("%-15s\t%s%n", freq.getText(), freq.getFrequency());
+			System.out.printf(format, freq.getText(), freq.getFrequency());
 		}
 	}
 

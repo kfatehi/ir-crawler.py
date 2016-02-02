@@ -36,7 +36,7 @@ public final class FindCommonWords {
 
 			ArrayList<Frequency> freqs = new ArrayList<>(map.values());
 			Collections.sort(freqs, Utilities.frequencyComparator);
-			Utilities.printFrequencies(freqs);
+			Utilities.printFrequencies(freqs, "%-32s\t%s%n");
 
 			st.close();
 		} catch(SQLException e) {

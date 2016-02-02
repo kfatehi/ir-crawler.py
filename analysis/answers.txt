@@ -8,7 +8,7 @@ How many unique pages did you find in the entire domain? (Uniqueness is establis
 
 How many subdomains did you find?
 
-See subdomain.txt
+123
 
 What is the longest page in terms of number of words? (Don't count HTML markup as words.)
 
