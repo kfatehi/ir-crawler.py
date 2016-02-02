@@ -12,7 +12,7 @@ import java.util.Collections;
 
 import java.sql.*;
 
-public final class FindCommonWords {
+public final class FindSubDomains {
 	/**
 	 * Loops through every page's text content to determine word frequencies.
 	 * 
@@ -25,7 +25,7 @@ public final class FindCommonWords {
 			Connection con = Database.conn;
 			PreparedStatement st = con.prepareStatement(
 					"SELECT text FROM PAGES "
-				   	+"WHERE TEXT IS NOT NULL");
+				   	+"WHERE TEXT IS NOT NULL LIMIT 10");
 			ResultSet rs = st.executeQuery();
 
 			while (rs.next()) {

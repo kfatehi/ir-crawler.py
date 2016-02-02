@@ -8,8 +8,13 @@ SRC= \
 		 src/db/*.java
 
 common-words: compile
+	echo "this will take awhile, please wait!!!"
 	java -classpath $(CLASSPATH) -D$(JDBC) \
-	 	ir.analysis.FindCommonWords
+	 	ir.analysis.FindCommonWords > words.txt
+
+subdomains: compile
+	java -classpath $(CLASSPATH) -D$(JDBC) \
+	 	ir.analysis.FindSubDomains
 
 compile: clean
 	@javac -g -d $(BUILD) -classpath $(CLASSPATH) $(SRC)
