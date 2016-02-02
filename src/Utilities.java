@@ -33,23 +33,18 @@ public class Utilities {
 	 * @param input The file to read in and tokenize.
 	 * @return The list of tokens (words) from the input file, ordered by occurrence.
 	 */
-	public static ArrayList<String> tokenizeFile(File input) {
+	public static ArrayList<String> tokenizeString(String input) {
     	ArrayList<String> out = new ArrayList<>();
 		final Pattern whitelist = Pattern.compile("([^A-z0-9])");
 		final Scanner sc;
-		try {
-			sc = new Scanner(input);
-			while (sc.hasNext()) {
-				out.add(
-						whitelist
-						.matcher(sc.next())
-						.replaceAll("")
-						.toLowerCase()
-					   );
-			}
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-			System.exit(1);
+		sc = new Scanner(input);
+		while (sc.hasNext()) {
+			out.add(
+					whitelist
+					.matcher(sc.next())
+					.replaceAll("")
+					.toLowerCase()
+				   );
 		}
 		return out;
 	}
@@ -142,24 +137,6 @@ public class Utilities {
 			if (result == 0) {
 				result = a.getText().compareTo(b.getText());
 			}
-			return result;
-		}
-	};
-
-
-	/**
-	 * A comparator used to sort a list of palindrome frequencies.
-	 *
-	 * <h2>Sort Criteria</h2><ol>
-	 * <li>decreasing length</li>
-	 * <li>decreasing frequency</li>
-	 * <li>alphabetical order</li></ol>
-	 */
-	public static Comparator<Frequency> palindromeFrequencyComparator = new Comparator<Frequency>() {
-		public int compare(Frequency a, Frequency b) {
-			int result = Integer.compare( b.getText().length(), a.getText().length() );
-			if (result == 0)
-				result = frequencyComparator.compare(a, b);
 			return result;
 		}
 	};

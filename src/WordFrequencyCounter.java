@@ -45,38 +45,15 @@ public final class WordFrequencyCounter {
 	 * @param words A list of words.
 	 * @return A list of word frequencies, ordered by decreasing frequency.
 	 */
-	public static List<Frequency> computeWordFrequencies(List<String> words) {
+	public static void computeWordFrequencies(List<String> words, HashMap<String, Frequency> map) {
 		if (words != null) {
-			HashMap<String,Frequency> map = new HashMap<>();
 			for (String word : words) {
+
 			    Frequency freq = map.getOrDefault(word, new Frequency(word));
+
 				freq.incrementFrequency();
 				map.put(word, freq);
 			}
-
-			ArrayList<Frequency> freqs = new ArrayList<>(map.values());
-			
-			Collections.sort(freqs, Utilities.frequencyComparator);
-
-			return freqs;
-		} else {
-			return new ArrayList<>();
 		}
-	}
-	
-	/**
-	 * Runs the word frequency counter. The input should be the path to a text file.
-	 * 
-	 * @param args The first element should contain the path to a text file.
-	 */
-	public static void main(String[] args) {
-		if (args.length == 0) {
-			System.err.println("Error: Expected input the path to a text file.");
-		    System.exit(1);
-		}
-		File file = new File(args[0]);
-		List<String> words = Utilities.tokenizeFile(file);
-		List<Frequency> frequencies = computeWordFrequencies(words);
-		Utilities.printFrequencies(frequencies);
 	}
 }

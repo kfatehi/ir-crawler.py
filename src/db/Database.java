@@ -1,70 +1,54 @@
-package ir.assignments.three.db;
+package ir.analysis.db;
 
 import java.sql.*;
 import java.util.Properties;
-
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
 
 /**
  * Provides access to a postgres database. */
 public class Database {
 
-	public static HikariDataSource ds;
+	/**
+	 * Database connection */
+	public static Connection conn;
 
 	/**
-	 * Returns true if database is configured, otherwise returns false */
-	public static boolean configured() {
-		return ds != null;
+	 * Returns true if connected to the database, otherwise returns false */
+	public static boolean connected() {
+		return conn != null;
 	}
 
-	/**
-	 * Configure the database connection pool.
-	 *
-	 * @param env Environment. Can be either prod or test.  */
-	public static boolean configure(String env) {
-		if (configured()) {
+	public static boolean configure() {
+		if (connected()) {
 			return true;
 		} else {
-			String url = "jdbc:postgresql://keyvan.pw:25432/ir_"+env;
-			HikariConfig config = new HikariConfig();
-			config.setJdbcUrl(url);
-			config.setUsername("ir_"+env);
-			config.setPassword(System.getProperty("pg_password"));
-			config.addDataSourceProperty("cachePrepStmts", "true");
-			config.addDataSourceProperty("prepStmtCacheSize", "250");
-			config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
-			ds = new HikariDataSource(config);
-			return true;
+			try {
+				String url = "jdbc:postgresql://keyvan.pw:25432/ir_prod";
+				Properties props = new Properties();
+				props.setProperty("user", "ir_prod");
+				props.setProperty("password", "o43jihr3hr3847r");
+				props.setProperty("ssl", "true");
+				conn = DriverManager.getConnection(url, props);
+				return true;
+			} catch(SQLException e) {
+				System.out.println("SQLException. Continuing without database.");
+				return false;
+			}
 		}
-	}
-
-	/**
-	 * Get a connection from the connection pool.
-	 */
-	public static Connection getConnection() throws SQLException {
-		return ds.getConnection();
 	}
 
 	/**
 	 * Execute a SQL command such as INSERT, UPDATE, or DELETE,
 	 * or any SQL command that returns nothing. */
 	public static boolean executeUpdate(String sql) {
-		if (configured()) {
-			Connection con = null;
+		if (connected()) {
 			try {
-				con = getConnection();
-				Statement st = con.createStatement();
+				Statement st = conn.createStatement();
 				st.executeUpdate(sql);
 				st.close();
 				System.out.println(sql);
 				return true;
-			} catch (Exception e) {
+			} catch (SQLException e) {
 				e.printStackTrace();
-			} finally {
-				if (con != null) {
-					try { con.close(); } catch (Exception e) {}
-				}
 			}
 		}
 		return false;
