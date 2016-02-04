@@ -10,7 +10,7 @@ SRC= \
 common-words: compile
 	echo "this will take awhile, please wait!!!"
 	java -classpath $(CLASSPATH) -D$(JDBC) \
-	 	ir.analysis.FindCommonWords > words.txt
+	 	ir.analysis.FindCommonWords
 
 subdomains: compile
 	java -classpath $(CLASSPATH) -D$(JDBC) \
