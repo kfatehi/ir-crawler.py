@@ -146,4 +146,16 @@ public class Utilities {
 			return result;
 		}
 	};
+
+	/**
+	 * A comparator used to sort a list of frequencies in alphabetical order
+	 *
+	 * <h2>Sort Criteria</h2><ol>
+	 * <li>alphabetical order</li></ol>
+	 */
+	public static Comparator<Frequency> alphabeticalComparator = new Comparator<Frequency>() {
+		public int compare(Frequency a, Frequency b) {
+			return a.getText().toLowerCase().compareTo(b.getText().toLowerCase());
+		}
+	};
 }

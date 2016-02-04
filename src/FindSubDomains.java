@@ -45,7 +45,7 @@ public final class FindSubDomains {
 			}
 
 			ArrayList<Frequency> freqs = new ArrayList<>(subdomains.values());
-			Collections.sort(freqs, Utilities.frequencyComparator);
+			Collections.sort(freqs, Utilities.alphabeticalComparator);
 			Utilities.printFrequencies(freqs, "%s, %d%n");
 
 			st.close();
