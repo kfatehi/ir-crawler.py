@@ -1,5 +1,6 @@
 var spawn = require('child_process').spawn;
-var logFile = '/home/kfatehi/public_html/crawler_logs/current.txt';
+var logFile = process.argv[2] || '/home/kfatehi/public_html/crawler_logs/current.txt';
+console.log("Logging to "+logFile);
 var logger = require('./logger')(logFile);
 
 var proc = null;

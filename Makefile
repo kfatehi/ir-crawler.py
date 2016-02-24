@@ -24,4 +24,4 @@ clean:
 	@mkdir -p $(BUILD)
 
 crawl:
-	node supervisor.js
+	node supervisor.js log.txt
